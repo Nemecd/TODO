@@ -17,6 +17,7 @@ class _AddScreenState extends State<AddScreen> {
   late String _description;
   late DateTime _dateTime;
   late TimeOfDay _time;
+  String _categoryValue = 'Personal';
 
   @override
   void initState() {
@@ -75,7 +76,43 @@ class _AddScreenState extends State<AddScreen> {
               ),
               const SizedBox(height: 16.0),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children:[
+                  const Text(
+                    'Category:',
+                    style: TextStyle(fontSize: 18.0)
+                  ),
+                  SizedBox(
+                    width: 250.0,
+                    child: DropdownButtonFormField<String>(
+                      value: _categoryValue,
+                      onChanged: (newValue) {
+                        setState(() {
+                          _categoryValue = newValue!;
+                        });
+                      },
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Personal',
+                          child: Text('Personal'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Work',
+                          child: Text('Work'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Shopping',
+                          child: Text('Shopping'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]
+              ),
+              const SizedBox(height: 16.0),
+              Row(
+                children:[
+                 const Text('Deadline', style: TextStyle(fontSize: 18.0),),
                   Expanded(
                     child: TextButton(
                       onPressed: () async {
@@ -111,7 +148,7 @@ class _AddScreenState extends State<AddScreen> {
                           }
                         } ,
                         child: Text(
-                          'time: ${_time.format(context)}'
+                          'Time: ${_time.format(context)}'
                         ),
                         )
                       )
@@ -134,6 +171,8 @@ class _AddScreenState extends State<AddScreen> {
                         title: _title, 
                         description: _description,
                         deadline: dateTime,
+                        category: _categoryValue,
+                        isDone: false
                         ));
                     Navigator.pop(context);
                   }
