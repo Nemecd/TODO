@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'TodoList.dart';
+import 'adHelper.dart';
 
 class EditScreen extends StatefulWidget {
   final TodoItem item;
@@ -21,6 +23,7 @@ class _EditScreenState extends State<EditScreen> {
   late String _category;
   late DateTime _dateTime;
   late TimeOfDay _time;
+  BannerAd? _bannerAd;
 
 
   @override
@@ -31,6 +34,23 @@ class _EditScreenState extends State<EditScreen> {
     _category = widget.item.category;
     _dateTime = widget.item.deadline;
     _time =TimeOfDay.fromDateTime(widget.item.deadline);
+
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
   }
 
   @override
@@ -39,7 +59,16 @@ class _EditScreenState extends State<EditScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Item'),
+        title: const Text('Edit Task',style: TextStyle( color: Colors.white),),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -92,7 +121,7 @@ class _EditScreenState extends State<EditScreen> {
             const SizedBox(height: 16.0,),
                           Row(
                 children:[
-                  const Text('Deadline', style: TextStyle(fontSize: 18.0),),
+                  const Text('At', style: TextStyle(fontSize: 18.0),),
                   Expanded(
                     child: TextButton(
                       onPressed: () async {
@@ -156,11 +185,16 @@ class _EditScreenState extends State<EditScreen> {
                     Navigator.pop(context);
                   }
                 },
-                child: Text('Save Changes'),
+                child: const Text('Save Changes',style: TextStyle( color: Colors.white),),
               ),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: Container(
+        width: _bannerAd?.size.width.toDouble() ?? 0,
+        height: _bannerAd?.size.height.toDouble() ?? 0,
+        child: _bannerAd != null ? AdWidget(ad: _bannerAd!) :  const Placeholder(),
       ),
     );
   }

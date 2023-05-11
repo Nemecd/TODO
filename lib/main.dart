@@ -5,6 +5,8 @@ import 'package:todo/TodoList.dart';
 import 'package:todo/TodoScreen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  _initGoogleMobileAds();
   runApp(const MyApp());
 }
 
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
       ),
       home: const TodoScreen() ,
     ),

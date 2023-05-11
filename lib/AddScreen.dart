@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 
 import 'TodoList.dart';
+import 'adHelper.dart';
 
 class AddScreen extends StatefulWidget {
   @override
@@ -18,7 +20,7 @@ class _AddScreenState extends State<AddScreen> {
   late DateTime _dateTime;
   late TimeOfDay _time;
   String _categoryValue = 'Personal';
-
+  BannerAd? _bannerAd;
   @override
   void initState() {
     super.initState();
@@ -26,6 +28,23 @@ class _AddScreenState extends State<AddScreen> {
     _description = '';
     _dateTime = DateTime.now();
     _time = TimeOfDay.now();
+
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
   }
 
   @override
@@ -34,7 +53,16 @@ class _AddScreenState extends State<AddScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Item'),
+        title: const Text('Add Task',style: TextStyle( color: Colors.white),),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -112,7 +140,7 @@ class _AddScreenState extends State<AddScreen> {
               const SizedBox(height: 16.0),
               Row(
                 children:[
-                 const Text('Deadline', style: TextStyle(fontSize: 18.0),),
+                 const Text('At', style: TextStyle(fontSize: 18.0),),
                   Expanded(
                     child: TextButton(
                       onPressed: () async {
@@ -137,13 +165,13 @@ class _AddScreenState extends State<AddScreen> {
                     Expanded(
                       child: TextButton(
                         onPressed: () async {
-                          final time = showTimePicker(
+                          final time =  await showTimePicker(
                             context : context,
                             initialTime: _time
                           );
                           if(time != null){
                             setState((){
-                              _time = time as TimeOfDay;
+                              _time = time;
                             });
                           }
                         } ,
@@ -177,12 +205,17 @@ class _AddScreenState extends State<AddScreen> {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Add Item'),
+                child: const Text('Add Item',style: TextStyle( color: Colors.white),),
               ),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: Container(
+        width: _bannerAd?.size.width.toDouble() ?? 0,
+        height: _bannerAd?.size.height.toDouble() ?? 0,
+        child: _bannerAd != null ? AdWidget(ad: _bannerAd!) : const Placeholder()
+      )
     );
   }
 }
